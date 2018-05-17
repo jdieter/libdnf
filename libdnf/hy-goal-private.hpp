@@ -49,10 +49,6 @@ inline DnfGoalActions & operator|=(DnfGoalActions & a, DnfGoalActions b)
     return a = a | b;
 }
 
-int sltr2job(const HySelector sltr, Queue *job, int solver_action);
-
-/* resolving the goal */
-int hy_goal_run_all_flags(HyGoal goal, hy_solution_callback cb, void *cb_data,
-                          DnfGoalActions flags);
+int sltrToJob(const HySelector sltr, Queue *job, int solver_action);
 
 #endif // HY_GOAL_INTERNAL_H
