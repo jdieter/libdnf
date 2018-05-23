@@ -215,10 +215,9 @@ class Goal(_hawkey.Goal):
     def push_userinstalled(self, query, history):
         msg = '--> Finding unneeded leftover dependencies' # translate
         logger.debug(msg)
-        pkgs = query.installed()
 
         # get only user installed packages
-        user_installed = history.select_user_installed(pkgs)
+        user_installed = query.userinstalled(history.swdb)
 
         for pkg in user_installed:
             self.userinstalled(pkg)

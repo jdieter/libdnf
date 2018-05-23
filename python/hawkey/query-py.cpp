@@ -695,6 +695,36 @@ get_advisory_pkgs(_QueryObject *self, PyObject *args)
 }
 
 static PyObject *
+filter_userinstalled(PyObject *self, PyObject *args, PyObject *kwds)
+{
+    HyQuery self_query_copy = new libdnf::Query(*((_QueryObject *) self)->query);
+    const char *kwlist[] = {"swdb", NULL};
+    PyObject *pySwdb;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O", (char **)kwlist, &pySwdb)) {
+        return NULL;
+    }
+    auto swigSwdb = reinterpret_cast< SwdbSwigPyObject * >(PyObject_GetAttrString(pySwdb, "this"));
+
+    if (swigSwdb == nullptr) {
+        PyErr_SetString(PyExc_SystemError, "Unable to parse SwigPyObject");
+        return NULL;
+    }
+
+    libdnf::Swdb * swdb = swigSwdb->ptr;
+
+    if (swdb == NULL) {
+        PyErr_SetString(PyExc_SystemError, "Unable to parse swig object");
+        return NULL;
+    }
+    self_query_copy->filterUserInstalled(*swdb);
+
+    PyObject *final_query = queryToPyObject(self_query_copy, ((_QueryObject *) self)->sack,
+                                            Py_TYPE(self));
+    return final_query;
+}
+
+static PyObject *
 filter_unneeded(PyObject *self, PyObject *args, PyObject *kwds)
 {
     HyQuery self_query_copy = new libdnf::Query(*((_QueryObject *) self)->query);
@@ -997,6 +1027,7 @@ static struct PyMethodDef query_methods[] = {
     {"count", (PyCFunction)q_length, METH_NOARGS,
         NULL},
     {"get_advisory_pkgs", (PyCFunction)get_advisory_pkgs, METH_VARARGS, NULL},
+    {"userinstalled", (PyCFunction)filter_userinstalled, METH_KEYWORDS|METH_VARARGS, NULL},
     {"_na_dict", (PyCFunction)query_to_name_arch_dict, METH_NOARGS, NULL},
     {"_name_dict", (PyCFunction)query_to_name_dict, METH_NOARGS, NULL},
     {"_nevra", (PyCFunction)add_nevra_or_other_filter, METH_VARARGS, NULL},
